@@ -8,4 +8,4 @@
 - [FAQ]()
 
 ## Presentation
-**Judge Code** is
+**Judge Code** is an AI code reviewer
