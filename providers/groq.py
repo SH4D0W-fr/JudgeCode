@@ -46,3 +46,36 @@ class GroqProvider:
         )
 
         return response.choices[0].message.content
+
+    def validate_syntax_with_ai(self, code: str, language: str):
+        prompt = f"""
+        You are a strict syntax validator.
+
+        Check only syntax for the given language. Do not review style, performance, architecture, or best practices.
+        Return ONLY a JSON object with this exact shape:
+        {{
+            "is_valid": boolean,
+            "line": number | null,
+            "error": string | null
+        }}
+
+        Rules:
+        - If syntax is valid: is_valid=true, line=null, error=null.
+        - If syntax is invalid: is_valid=false, line=<best line number or null>, error=<clear syntax error message>.
+        - Return no markdown, no code block, no explanation.
+
+        Language: {language}
+
+        Code:
+        {code}
+        """
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0
+        )
+
+        return response.choices[0].message.content
