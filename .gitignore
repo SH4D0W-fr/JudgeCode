@@ -3,3 +3,6 @@ tests/*
 *.pyc
 .vscode/*
 .env
+*.spec
+dist/*
+build/*
