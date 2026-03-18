@@ -43,8 +43,15 @@ def main():
     print_banner()
     cprint("Everything ready !", ConsoleColors.CYAN)
     print("Please, enter the path to the file you want to review")
-    path = prompt_file_path()
-    fp.process_file(path)
+
+    while True:
+        try:
+            path = prompt_file_path()
+            fp.process_file(path)
+            print("\nYou can review another file, or press Ctrl+C to quit.")
+        except KeyboardInterrupt:
+            print("\nExiting JudgeCode. Bye!")
+            break
 
 
 if __name__ == "__main__":
