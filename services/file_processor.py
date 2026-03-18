@@ -36,9 +36,12 @@ def check_error(file_path, language):
             esprima.parseScript(open(file_path).read())
             return None
         except esprima.Error as e:
+            # esprima versions expose different error attributes; fall back safely.
+            error_line = getattr(e, 'lineNumber', None)
+            error_message = getattr(e, 'description', None) or getattr(e, 'message', None) or str(e)
             return {
-                "line": e.lineNumber,
-                "error": e.description
+                "line": error_line,
+                "error": error_message
             }
     else:
         return None
