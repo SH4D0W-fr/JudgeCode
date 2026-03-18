@@ -56,15 +56,13 @@ def process_file(file_path):
         errors = check_error(file_path, code_language)
         if errors:
             print(f"Errors found in {file_path}:")
-            for error in errors:
-                print(f"  Line {error['line']}: {error['error']}")
+            print(f"  Line {errors['line']}: {errors['error']}")
         else:
             print(f"No errors found in {file_path}.")
     elif code_language == 'JavaScript':
         errors = check_error(file_path, code_language)
         if errors:
             print(f"Errors found in {file_path}:")
-            for error in errors:
-                print(f"  Line {error['line']}: {error['error']}")
+            print(f"  Line {errors['line']}: {errors['error']}")
         else:
             print(f"No errors found in {file_path}.")
