@@ -1,3 +1,9 @@
+############################################################################################
+## SYNTAX_VALIDATOR.PY                                                                    ##
+## This file contains the logic for validating syntax in different programming languages. ##
+############################################################################################
+
+
 import ast
 import esprima
 import json

@@ -1,3 +1,8 @@
+############################################################################################
+## OUTPUT_FORMATTER.PY                                                                    ##
+## This file contains the logic for formatting and displaying output.                     ##
+############################################################################################
+
 from shared.console import ConsoleColors, cprint
 
 
