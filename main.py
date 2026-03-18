@@ -24,6 +24,9 @@ print("Initializing application...")
 # Imports
 import sys
 import os
+import dotenv
+import ast, esprima, json, subprocess
+import openai
 import services.file_processor as fp
 
 # When everything is ready
