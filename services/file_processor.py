@@ -6,8 +6,9 @@
 # Imports
 import os, sys
 import ast # For parsing Python code
+import esprima # For parsing JavaScript code
 
-# Placeholder for language detection logic
+# Language detection based on file extension
 def detect_language(file_path):
     if file_path.endswith('.py'):
         return 'Python'
@@ -18,21 +19,32 @@ def detect_language(file_path):
     else:
         return 'Unknown'
 
+# Error checking based on language
 def check_error(file_path, language):
-    # Placeholder for error checking logic based on the detected language
     print(f"Checking for errors in {file_path} as {language} code...")
-    try:
-        ast.parse(open(file_path).read())
+    if language == 'Python':
+        try:
+            ast.parse(open(file_path).read())
+            return None
+        except SyntaxError as e:
+            return {
+                "line": e.lineno,
+                "error": e.msg
+            }
+    elif language == 'JavaScript':
+        try:
+            esprima.parseScript(open(file_path).read())
+            return None
+        except esprima.Error as e:
+            return {
+                "line": e.lineNumber,
+                "error": e.description
+            }
+    else:
         return None
-    except SyntaxError as e:
-        return {
-            "line": e.lineno,
-            "error": e.msg
-        }
 
 # Main function to process the file
 def process_file(file_path):
-    # Placeholder for file processing logic
     print(f"Processing file: {file_path}")
     code_language = detect_language(file_path)
     print(f"Detected language: {code_language}")
@@ -46,3 +58,13 @@ def process_file(file_path):
             print(f"Errors found in {file_path}:")
             for error in errors:
                 print(f"  Line {error['line']}: {error['error']}")
+        else:
+            print(f"No errors found in {file_path}.")
+    elif code_language == 'JavaScript':
+        errors = check_error(file_path, code_language)
+        if errors:
+            print(f"Errors found in {file_path}:")
+            for error in errors:
+                print(f"  Line {error['line']}: {error['error']}")
+        else:
+            print(f"No errors found in {file_path}.")
