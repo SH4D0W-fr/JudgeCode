@@ -24,6 +24,7 @@ print("Initializing application...")
 # Imports
 import sys
 import os
+import services.file_processor as fp
 
 # When everything is ready
 print("Everything ready !")
@@ -43,5 +44,6 @@ def check_file(path):
         main()
     else:
         print(f"File found: {path}")
+        fp.process_file(path)
 
 check_file(path)
