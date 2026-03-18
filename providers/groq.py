@@ -28,6 +28,7 @@ class GroqProvider:
             "suggestions": [],
             "score": number
         }}
+        You absolutely must return a JSON object with this exact structure. Do not include any explanations, markdown, or code blocks. If you cannot review the code, return an object with an "error" field describing the issue.
         Please, provide specific feedback on the code, including any potential bugs, security vulnerabilities, performance issues, or areas for improvement. Also, give an overall score for the code quality on a scale from 0 to 10, where 10 is excellent and 0 is very poor.
 
         If the file contains others things than code, please ignore them and only review the code part.
