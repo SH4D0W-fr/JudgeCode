@@ -7,6 +7,9 @@
 import os, sys
 import ast # For parsing Python code
 import esprima # For parsing JavaScript code
+import json # For parsing JSON files
+import subprocess # For running external compilers
+import shutil # For locating compilers in PATH
 
 # Language detection based on file extension
 def detect_language(file_path):
@@ -16,8 +19,10 @@ def detect_language(file_path):
         return 'JavaScript'
     elif file_path.endswith('.java'):
         return 'Java'
+    elif file_path.endswith('.json'):
+        return 'JSON'
     else:
-        return 'Unknown'
+        return 'Others'
 
 # Error checking based on language
 def check_error(file_path, language):
@@ -36,12 +41,20 @@ def check_error(file_path, language):
             esprima.parseScript(open(file_path).read())
             return None
         except esprima.Error as e:
-            # esprima versions expose different error attributes; fall back safely.
             error_line = getattr(e, 'lineNumber', None)
             error_message = getattr(e, 'description', None) or getattr(e, 'message', None) or str(e)
             return {
                 "line": error_line,
                 "error": error_message
+            }
+    elif language == 'JSON':
+        try:
+            json.loads(open(file_path).read())
+            return None
+        except json.JSONDecodeError as e:
+            return {
+                "line": e.lineno,
+                "error": e.msg,
             }
     else:
         return None
@@ -63,6 +76,13 @@ def process_file(file_path):
         else:
             print(f"No errors found in {file_path}.")
     elif code_language == 'JavaScript':
+        errors = check_error(file_path, code_language)
+        if errors:
+            print(f"Errors found in {file_path}:")
+            print(f"  Line {errors['line']}: {errors['error']}")
+        else:
+            print(f"No errors found in {file_path}.")
+    elif code_language == 'JSON':
         errors = check_error(file_path, code_language)
         if errors:
             print(f"Errors found in {file_path}:")
