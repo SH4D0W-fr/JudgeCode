@@ -3,89 +3,59 @@
 ## This file contains the logic for processing files.                                     ##
 ############################################################################################
 
-# Imports
-import os, sys
-import ast # For parsing Python code
-import esprima # For parsing JavaScript code
-import json # For parsing JSON files
-import subprocess # For running external compilers
-import shutil # For locating compilers in PATH
+from providers.groq import GroqProvider
+from shared.console import enable_ansi_colors_on_windows
+from services.output_formatter import print_error, print_review, print_success
+from services.review_parser import parse_ai_response
+from services.syntax_validator import detect_language, validate_syntax
 
-# Language detection based on file extension
-def detect_language(file_path):
-    if file_path.endswith('.py'):
-        return 'Python'
-    elif file_path.endswith('.js'):
-        return 'JavaScript'
-    elif file_path.endswith('.java'):
-        return 'Java'
-    elif file_path.endswith('.json'):
-        return 'JSON'
-    else:
-        return 'Others'
+# Initialize the GROQ provider
+groq_provider = GroqProvider()
 
 # Error checking based on language
 def check_error(file_path, language):
     print(f"Checking for errors in {file_path} as {language} code...")
-    if language == 'Python':
-        try:
-            ast.parse(open(file_path).read())
-            return None
-        except SyntaxError as e:
-            return {
-                "line": e.lineno,
-                "error": e.msg
-            }
-    elif language == 'JavaScript':
-        try:
-            esprima.parseScript(open(file_path).read())
-            return None
-        except esprima.Error as e:
-            error_line = getattr(e, 'lineNumber', None)
-            error_message = getattr(e, 'description', None) or getattr(e, 'message', None) or str(e)
-            return {
-                "line": error_line,
-                "error": error_message
-            }
-    elif language == 'JSON':
-        try:
-            json.loads(open(file_path).read())
-            return None
-        except json.JSONDecodeError as e:
-            return {
-                "line": e.lineno,
-                "error": e.msg,
-            }
-    else:
-        return None
+    with open(file_path, encoding='utf-8') as f:
+        code = f.read()
+
+    syntax_error = validate_syntax(code, language)
+    if syntax_error:
+        return {
+            "type": "syntax_error",
+            **syntax_error
+        }
+
+    try:
+        ai_response = groq_provider.review(code)
+    except Exception as e:
+        return {
+            "type": "review_error",
+            "line": None,
+            "error": f"AI review failed: {str(e)}"
+        }
+
+    return {
+        "type": "review",
+        "review": parse_ai_response(ai_response)
+    }
 
 # Main function to process the file
 def process_file(file_path):
+    enable_ansi_colors_on_windows()
+
     print(f"Processing file: {file_path}")
     code_language = detect_language(file_path)
     print(f"Detected language: {code_language}")
 
-    if code_language == 'Unknown':
+    if code_language == 'Others':
         print("Unsupported file type.")
         return
-    elif code_language == 'Python':
-        errors = check_error(file_path, code_language)
-        if errors:
-            print(f"Errors found in {file_path}:")
-            print(f"  Line {errors['line']}: {errors['error']}")
-        else:
-            print(f"No errors found in {file_path}.")
-    elif code_language == 'JavaScript':
-        errors = check_error(file_path, code_language)
-        if errors:
-            print(f"Errors found in {file_path}:")
-            print(f"  Line {errors['line']}: {errors['error']}")
-        else:
-            print(f"No errors found in {file_path}.")
-    elif code_language == 'JSON':
-        errors = check_error(file_path, code_language)
-        if errors:
-            print(f"Errors found in {file_path}:")
-            print(f"  Line {errors['line']}: {errors['error']}")
-        else:
-            print(f"No errors found in {file_path}.")
+
+    result = check_error(file_path, code_language)
+
+    if result.get("type") in ["syntax_error", "review_error"]:
+        print_error(file_path, result.get("line"), result.get("error"))
+        return
+
+    print_success(file_path)
+    print_review(result.get("review", {}))

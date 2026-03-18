@@ -4,8 +4,14 @@
 ## sets up the necessary configurations, and starts the main event loop.                  ##  
 ############################################################################################
 
-# Welcome message and application banner
-print("\033[91m" + r"""
+import os
+
+import services.file_processor as fp
+from shared.console import ConsoleColors, cprint, enable_ansi_colors_on_windows
+
+enable_ansi_colors_on_windows()
+
+BANNER = r"""
     $$$$$\                 $$\                      $$$$$$\                  $$\           
     \__$$ |                $$ |                    $$  __$$\                 $$ |          
         $$ |$$\   $$\  $$$$$$$ | $$$$$$\   $$$$$$\  $$ /  \__| $$$$$$\   $$$$$$$ | $$$$$$\  
@@ -17,36 +23,29 @@ $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |  $$\ $$ |  $$ |$$ |  $$ |
                                         $$\   $$ |                                                  
                                         \$$$$$$  |                                                  
                                          \______/                                                   
-""" + "\033[0m"
-)
-print("Initializing application...")
+"""
 
-# Imports
-import sys
-import os
-import dotenv
-import ast, esprima, json, subprocess
-import openai
-import services.file_processor as fp
 
-# When everything is ready
-print("Everything ready !")
-print("Please, enter the path to the file you want to review")
+def print_banner():
+    print(ConsoleColors.RED + BANNER + ConsoleColors.RESET)
+    cprint("Initializing application...", ConsoleColors.BLUE)
 
-# Main function to get the file path from the user
+def prompt_file_path():
+    while True:
+        path = input("> File path : ").strip()
+        if os.path.isfile(path):
+            cprint(f"File found: {path}", ConsoleColors.GREEN)
+            return path
+        cprint("File not found. Try again.", ConsoleColors.YELLOW)
+
+
 def main():
-   path = input("> File path : ")
-   return path
+    print_banner()
+    cprint("Everything ready !", ConsoleColors.CYAN)
+    print("Please, enter the path to the file you want to review")
+    path = prompt_file_path()
+    fp.process_file(path)
 
-path = main()
 
-# Check if the file exists
-def check_file(path):
-    if not os.path.isfile(path):
-        print("File not found.")
-        main()
-    else:
-        print(f"File found: {path}")
-        fp.process_file(path)
-
-check_file(path)
+if __name__ == "__main__":
+    main()
