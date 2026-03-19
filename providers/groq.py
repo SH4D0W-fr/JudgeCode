@@ -6,14 +6,16 @@
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from shared.app_config import get_or_prompt_groq_api_key
 
 load_dotenv()
 
 class GroqProvider:
     def __init__(self):
         self.model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        api_key = get_or_prompt_groq_api_key()
         self.client = OpenAI(
-            api_key=os.getenv("GROQ_API_KEY"),
+            api_key=api_key,
             base_url="https://api.groq.com/openai/v1"
         )
 
