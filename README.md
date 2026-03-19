@@ -56,7 +56,8 @@ cd JudgeCode
 pip install -r requirements.txt
 ```
 
-4. Edit the `.env.example` to `.env` and change the API key to your own.
+4. (Optional) Copy `.env.example` to `.env` and set your API key.
+	If no key is found, JudgeCode will ask for it in the console on first run and save it for next launches.
 
 5. Run the CLI.
 ```powershell
